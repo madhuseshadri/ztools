@@ -1,0 +1,10 @@
+cwd=$(pwd)
+root=/sys/dev/char
+#root=/sys/dev/block
+cd $root
+function ztrek () { cd $1; for a in $(ls); do echo "./$1/$a"; done; cd $2; } 
+#for a in $(ls $root); do for b in $(ztrek $a $root); do if test $(slice $b 0:-6) = uevent; then echo $b; cat $b; fi; done; done
+for a in $(ls); do for b in $(ztrek $a $root); do if test $(slice $b 0:-6) = uevent; then x=""; for c in $(cat $b); do x="$x $c"; done; echo "$x"; fi; done; done
+cd $cwd 
+
+

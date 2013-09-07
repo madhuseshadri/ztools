@@ -1,0 +1,17 @@
+#list devices on the motherboard names as mapped by linux kernel
+#author - madhukumar seshadri
+
+function recurse() { for a in $(ls $1); do if test -d $1/$a; then echo $1/$a; recurse $1/$a; else echo $1/$a; fi; done; }
+start=$(pwd)
+if test -n $1; then
+	start=$1
+fi 
+
+if test -n $2; then 
+	exp=$2; 
+fi 
+
+recurse $start
+
+
+

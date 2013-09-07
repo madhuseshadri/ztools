@@ -1,0 +1,4 @@
+dir=$2
+if test -z $dir; then dir=.; fi 
+#for x in $(python /py/trek.py $dir); do echo searching in $x; egrep $1 $x; done
+for x in $(rls $dir); do echo searching in $x; egrep $1 $x; done
