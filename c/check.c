@@ -8,8 +8,12 @@ file / node capabilites of test need to be included
 -- mknod .. check
 { eq | is } { neq | is not } { in | not in } { geq equalorgreaterthan } 
 { ngeq | leq equalorlesserthan | nleq | gt greaterthan | ngt | lt lessthan | nlt } 
-*/
 
+gcc -o check check.c - will get you the binary for using 
+
+This is better than saying -z -n etc .. 
+
+*/
 #define __STDIO__ 1	//if 0, make sure VERBOSE is 0
 #define VERBOSE 0
  
@@ -17,9 +21,66 @@ file / node capabilites of test need to be included
 #include <stdio.h>
 #endif
 
-#include "str.h"
-#include "number.h"
-#include "parse.h"
+#define digits "0123456789"
+
+/*
+Todo if you remove printf stdio.h dependency is gone
+Todo - cpu specific datatypes for 32bit and 64 bit will be needed to tonumber
+we have it as int but it need to be unsigned 64bit 0-2**64 for positive integers
+2**63 for singed integers and 32 for 32 bit system
+*/
+
+int len(const char* x) {
+	int len=0; 
+	while(*x++)   len++; 
+	return len;
+}
+
+int cmp(const char *x, const char *y) {
+	int i=0;
+	int xlen=len(x); 
+	int ylen=len(y); 
+	if (xlen != ylen) return 0; 
+	for (i=0;i<xlen;i++) { 
+		if (x[i] != y[i]) return 0; 
+	}
+	return 1; 
+}
+
+void copy(char *original, char* clone) { 
+	while ((*clone++=*original++)); 
+}
+
+int power(int x, int n) {
+	int i;
+	int o=1; 
+	for (i=0;i<n;i++) 
+		o = o * x;
+	return o;
+}
+
+int _number(char x) {
+	int i;
+        for (i=0;i<len(digits);i++) {
+                if (x==digits[i]) return i;
+        }
+	return i;
+}
+
+int tonumber(char* str) { 
+	int i,n=0,nofs,base=0;
+	int stop=-1;
+	int strlen = len(str);
+	if (*str == '-') 
+		stop=0;
+        for (i=strlen-1;i>stop;i--) {
+		nofs=_number(str[i]);
+		//printf("i:%d digit:%d 10base:%d \n",i,nofs, base);
+		n = n + power(10,base++) * nofs;
+        }
+	if (stop==0)  n=n*-1;  
+        return n;
+}
 
 int main(int argc, char** argv) {
 	/* if eval 
@@ -28,44 +89,23 @@ int main(int argc, char** argv) {
 		something is greater than something - treat as integer,	5 + prog
 		something is lesser than something - treat as integer, 5 
 		something is greater than or equal to something - treat as integer, 8 + prog
-		something is lesser than or equal to something, 8
+		something is lesser than or equal to something, 8 
 		something is in something, 4
 		something is not in something, 5 + prog
+
+		eq | is 
+		neq | is not 
+		in
+		not in 
+		geq equalorgreaterthan
+		ngeq 
+		leq equalorlesserthan 
+		nleq
+		gt greaterthan
+		ngt
+		lt lessthan
+		nlt
 	*/
-	sequence seq;
-	char* wb = " \t\n";
-
-	seq._w=malloc(len(argv[1]));
-	seq.w = seq._w;
-	
-	while (parse(argv[1],wb,&seq) { 
-		if (strcmp(seq.w,"in")) {
-			addto(expression,0,seq.w);
-			addto(expression,1,IN);
-			in=1;
-		}
-		else if (strcmp(seq.w,"not") && !in) { 
-			addto(expression,0,seq.w)
-		}
-		else if (strcmp(seq.w,"is")) { 
-		}
-		else if (strcmp(seq.w,"lesser")) { 
-		} 
-		else if (strcmp(seq.w,"greater")) { 
-		} 
-		else if (strcmp(seq.w,"than")) { 
-		} 
-		else if (strcmp(seq.w,"and")) { 
-		} 
-		else if (strcmp(seq.w,"or")) { 
-		} 
-	}
-	//seq.w has last one
-
-	free(seq.w);
-}
-
-
 	int i=0;
 	int prog=1;
 	char *lhs,*rhs,*op;
@@ -75,7 +115,7 @@ int main(int argc, char** argv) {
 	pass=1;
 
 	if (VERBOSE) printf("No of arguments:%d\n",argc);
-	if (VERBOSE) for (i;i<argc;i++) printf("arg%d:%s ",i,argv[i]);
+	if (VERBOSE) for (i=0;i<argc;i++) printf("arg%d:%s ",i,argv[i]);
 	if (VERBOSE) printf("%s","\n");
 
 	//-- nasty code below 
